@@ -207,10 +207,20 @@ h1, h2, p { margin-top: 0; }
 .question-score { margin-left: auto; }
 .question-prompt { margin: 24px 0 25px; color: #304258; font-size: 17px; line-height: 1.85; letter-spacing: .005em; }
 .question-prompt .math-expression { color: #344d60; font-family: "DM Sans", sans-serif; font-weight: 600; }
+.option-mode-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: -7px 0 11px; }
+.option-mode-label { color: #87928e; font-size: 10px; }
+.option-mode-button { min-height: 30px; padding: 0 10px; border: 1px solid #dce6df; border-radius: 7px; color: #55715f; background: #f7faf5; font-size: 10px; cursor: pointer; transition: .15s ease; }
+.option-mode-button:hover { border-color: #9aaf9f; background: #eff5eb; }
+.option-mode-button.active { border-color: #d7b58e; color: #8a6237; background: #fff8ed; }
+.option-mode-button.active:hover { border-color: #c89c6e; background: #fff3e0; }
+.option-mode-hint { color: #9aa2a5; font-size: 9px; }
 .options-list { display: grid; gap: 9px; }
 .answer-option { display: flex; align-items: center; gap: 11px; min-height: 47px; padding: 8px 12px; color: #617082; border: 1px solid #e8ece9; border-radius: 8px; font-size: 12px; cursor: pointer; transition: .15s ease; }
 .answer-option:hover { border-color: #c3d1d0; background: #fafcfb; }
 .answer-option.selected { border-color: #7e9e9c; color: #415c69; background: #f3f8f6; box-shadow: inset 0 0 0 1px #7e9e9c45; }
+.answer-option.eliminated { border-style: dashed; color: #9aa2a5; background: #fafbf9; }
+.answer-option.eliminated:hover { border-color: #d1a9a1; background: #fff9f7; }
+.answer-option.eliminated .option-text { color: #9da3a3; text-decoration: line-through; text-decoration-color: #bc796e; text-decoration-thickness: 1.5px; }
 .option-letter { display: grid; place-items: center; width: 24px; height: 24px; flex: none; border: 1px solid #e1e6e3; border-radius: 50%; color: #97a1a6; font-size: 10px; }
 .answer-option.selected .option-letter { border-color: #789592; color: #fff; background: #789592; }
 .question-nav-row { display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 15px; border-top: 1px solid #eff1ee; }

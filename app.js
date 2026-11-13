@@ -249,6 +249,8 @@ let currentTerm = "all";
 let selectedTopics = new Set();
 let quizItems = [];
 let answers = [];
+let eliminatedOptions = [];
+let optionMarkingMode = false;
 let currentQuestion = 0;
 let timerId = null;
 let remainingSeconds = 0;
@@ -410,6 +412,8 @@ function startQuiz() {
     topicName: selectedUnits.find((unit) => question.lessonIds?.includes(unit.id))?.title || selectedUnits.find((unit) => unit.bankTopic === question.topic)?.title || "數學單元",
   }));
   answers = new Array(quizItems.length).fill(null);
+  eliminatedOptions = quizItems.map(() => new Set());
+  optionMarkingMode = false;
   currentQuestion = 0;
   startedAt = Date.now();
   remainingSeconds = Number(document.getElementById("duration").value) * 60;
@@ -450,14 +454,31 @@ function renderQuestion() {
   const questionOrigin = question.sourceLabel
     ? `<p class="question-origin">歷屆試題 · <a href="${question.sourceUrl}" target="_blank" rel="noopener noreferrer">${question.sourceLabel}（官方原題）</a></p>`
     : `<p class="question-origin">原創練習題</p>`;
+  const markedOptions = eliminatedOptions[currentQuestion] || new Set();
   card.innerHTML = `
     <div class="question-meta"><span class="question-number">${String(currentQuestion + 1).padStart(2, "0")}</span><span>第 ${currentQuestion + 1} 題</span><span class="question-type">單選題</span><span class="question-score">平均配分</span></div>
     ${questionOrigin}
     <p class="question-prompt">${question.prompt}</p>
-    <div class="options-list" role="radiogroup" aria-label="選擇答案">${question.options.map((option, index) => `<button type="button" class="answer-option${selected === index ? " selected" : ""}" role="radio" aria-checked="${selected === index}" data-option="${index}"><span class="option-letter">${letters[index]}</span><span>${option}</span></button>`).join("")}</div>
+    <div class="option-mode-row"><span class="option-mode-label">選項工具</span><button type="button" class="option-mode-button${optionMarkingMode ? " active" : ""}" id="toggle-option-mode" aria-pressed="${optionMarkingMode}">${optionMarkingMode ? "切回作答" : "劃掉選項"}</button><span class="option-mode-hint">${optionMarkingMode ? "點選選項可劃掉或恢復" : "作答模式：選擇你的答案"}</span></div>
+    <div class="options-list" role="radiogroup" aria-label="選擇答案">${question.options.map((option, index) => {const eliminated=markedOptions.has(index);return `<button type="button" class="answer-option${selected === index ? " selected" : ""}${eliminated ? " eliminated" : ""}" role="radio" aria-checked="${selected === index}" aria-label="${letters[index]}：${option}${eliminated ? "，已劃掉" : ""}" data-option="${index}"><span class="option-letter">${letters[index]}</span><span class="option-text">${option}</span></button>`}).join("")}</div>
     <div class="question-nav-row"><button type="button" class="secondary-button" id="previous-question" ${currentQuestion === 0 ? "disabled" : ""}>← 上一題</button><button type="button" class="${currentQuestion === quizItems.length - 1 ? "submit-button" : "secondary-button"}" id="next-question">${currentQuestion === quizItems.length - 1 ? "交卷並查看詳解 →" : "下一題 →"}</button></div>`;
+  card.querySelector("#toggle-option-mode").addEventListener("click", () => {
+    optionMarkingMode = !optionMarkingMode;
+    renderQuestion();
+  });
   card.querySelectorAll("[data-option]").forEach((button) => button.addEventListener("click", () => {
-    answers[currentQuestion] = Number(button.dataset.option);
+    const optionIndex = Number(button.dataset.option);
+    const currentMarks = eliminatedOptions[currentQuestion];
+    if (optionMarkingMode) {
+      if (currentMarks.has(optionIndex)) currentMarks.delete(optionIndex);
+      else {
+        currentMarks.add(optionIndex);
+        if (answers[currentQuestion] === optionIndex) answers[currentQuestion] = null;
+      }
+    } else {
+      answers[currentQuestion] = optionIndex;
+      currentMarks.delete(optionIndex);
+    }
     renderQuestion();
   }));
   card.querySelector("#previous-question").addEventListener("click", () => moveQuestion(-1));
@@ -597,12 +618,14 @@ document.getElementById("difficulty").addEventListener("change", updatePreview);
 document.getElementById("duration").addEventListener("change", updatePreview);
 startButton.addEventListener("click", startQuiz);
 document.getElementById("back-to-setup").addEventListener("click", () => {
-  const answered = answers.some((answer) => answer !== null);
-  if (answered && !window.confirm("離開後目前的作答不會保留，確定返回範圍設定嗎？")) return;
+  const hasWork = answers.some((answer) => answer !== null) || eliminatedOptions.some((options) => options.size > 0);
+  if (hasWork && !window.confirm("離開後目前的作答與劃掉標記不會保留，確定返回範圍設定嗎？")) return;
   resetToSetup();
 });
 document.getElementById("retry-button").addEventListener("click", () => {
   answers = new Array(quizItems.length).fill(null);
+  eliminatedOptions = quizItems.map(() => new Set());
+  optionMarkingMode = false;
   currentQuestion = 0;
   startedAt = Date.now();
   remainingSeconds = Number(document.getElementById("duration").value) * 60;
