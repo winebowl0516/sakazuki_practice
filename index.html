@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f7f7f4" />
+    <title>歆羽｜數學練習室</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="#home" aria-label="歆羽首頁">
+          <span class="brand-mark">歆</span>
+          <span class="brand-copy"><strong>歆羽</strong><small>數學練習室</small></span>
+        </a>
+
+        <div class="side-label">學習空間</div>
+        <nav class="side-nav" aria-label="主要導覽">
+          <a class="nav-link active" href="#home" aria-current="page">
+            <span class="nav-icon">▦</span><span>開始練習</span><span class="nav-arrow">›</span>
+          </a>
+          <button class="nav-link muted" type="button" data-toast="錯題收藏會在完成練習後開放。">
+            <span class="nav-icon">♡</span><span>錯題收藏</span><span class="nav-badge">即將推出</span>
+          </button>
+          <button class="nav-link muted" type="button" data-toast="學習紀錄會在完成練習後開放。">
+            <span class="nav-icon">◷</span><span>學習紀錄</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-spacer"></div>
+        <div class="weekly-card">
+          <div class="weekly-top"><span class="weekly-spark">✳</span><span>本週練習</span><strong>2 / 5 天</strong></div>
+          <div class="week-dots" aria-label="本週已練習兩天"><i class="done"></i><i class="done"></i><i></i><i></i><i></i></div>
+          <p>每天一點點，進步看得見。</p>
+        </div>
+        <div class="sidebar-footer"><span class="avatar">同</span><span><strong>自主練習</strong><small>準備好就開始吧</small></span><span class="more">···</span></div>
+      </aside>
+
+      <main class="main-area" id="home">
+        <header class="topbar">
+          <div class="breadcrumb"><span>學習空間</span><b>/</b><strong id="breadcrumb-current">開始練習</strong></div>
+          <div class="topbar-right"><span class="curriculum-pill"><i></i> 台灣 108 課綱</span><button class="help-button" type="button" data-toast="選好年級與範圍，就能建立一份專屬練習卷。">需要幫助？ <span>↗</span></button></div>
+        </header>
+
+        <section class="view active" id="setup-view">
+          <div class="intro-row">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-line"></span> YOUR PRACTICE, YOUR PACE</div>
+              <h1>把今天的範圍，<br class="mobile-break" />變成一份練習考卷。</h1>
+              <p class="intro-copy">自己選範圍、自己掌握節奏。完成後還有逐題詳解陪你看懂每一步。</p>
+            </div>
+            <div class="today-chip"><span class="today-icon">✳</span><span>今天也為自己<br /><strong>留一點練習時間</strong></span></div>
+          </div>
+
+          <div class="workspace-grid">
+            <section class="builder-card card">
+              <div class="section-heading">
+                <div class="step-index">01</div>
+                <div><h2>選擇練習範圍</h2><p>依年級與課程單元，勾選想練習的內容</p></div>
+                <span class="required-note">必填</span>
+              </div>
+
+              <div class="form-block">
+                <label class="field-label">學習階段</label>
+                <div class="stage-tabs" role="tablist" aria-label="選擇學習階段">
+                  <button type="button" class="stage-tab" data-stage="elementary" role="tab" aria-selected="false">國小</button>
+                  <button type="button" class="stage-tab active" data-stage="junior" role="tab" aria-selected="true">國中</button>
+                  <button type="button" class="stage-tab" data-stage="senior" role="tab" aria-selected="false">高中</button>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-block grade-field">
+                  <label class="field-label" for="grade-select">年級</label>
+                  <div class="select-wrap"><select id="grade-select" aria-label="選擇年級"></select><span class="select-chevron">⌄</span></div>
+                </div>
+                <div class="form-block course-field" id="course-field" hidden>
+                  <label class="field-label" for="course-select">高二起課程</label>
+                  <div class="select-wrap"><select id="course-select"><option value="A">數學 A</option><option value="B">數學 B</option></select><span class="select-chevron">⌄</span></div>
+                </div>
+                <div class="subject-field">
+                  <span class="field-label">科目</span>
+                  <div class="subject-pill"><span class="math-symbol">∑</span><span>數學</span><span class="subject-lock">第一階段</span></div>
+                </div>
+              </div>
+
+              <div class="range-heading">
+                <div><label class="field-label">課本章節與小節</label><p class="field-hint">依年級、學期與高中課程更新；可整章或逐小節勾選</p></div>
+                <div class="range-actions"><button type="button" id="select-all" class="text-button">全選</button><span></span><button type="button" id="clear-all" class="text-button">清除</button></div>
+              </div>
+              <div class="term-tabs" role="group" aria-label="依學期篩選課程單元">
+                <button type="button" class="term-tab active" data-term="all" aria-pressed="true">全部學期</button>
+                <button type="button" class="term-tab" data-term="first" aria-pressed="false">上學期</button>
+                <button type="button" class="term-tab" data-term="second" aria-pressed="false">下學期</button>
+              </div>
+              <div class="topic-grid" id="topic-grid" aria-live="polite"></div>
+              <div class="range-foot"><span class="check-dot">✓</span><span>範圍由你決定，練習卷只會使用已勾選單元的題目。</span></div>
+
+              <div class="divider"></div>
+              <div class="section-heading settings-heading">
+                <div class="step-index pale">02</div>
+                <div><h2>設定考卷形式</h2><p>依照你今天的時間與練習目標調整</p></div>
+              </div>
+              <div class="settings-grid">
+                <div class="form-block">
+                  <label class="field-label" for="question-count">題數</label>
+                  <div class="select-wrap"><select id="question-count"><option value="5">5 題｜短練習</option><option value="10" selected>10 題｜標準練習</option><option value="15">15 題｜完整練習</option></select><span class="select-chevron">⌄</span></div>
+                </div>
+                <div class="form-block">
+                  <label class="field-label" for="difficulty">難度</label>
+                  <div class="select-wrap"><select id="difficulty"><option value="mixed" selected>基礎到進階</option><option value="basic">基礎觀念</option><option value="challenge">進階挑戰</option></select><span class="select-chevron">⌄</span></div>
+                </div>
+                <div class="form-block">
+                  <label class="field-label" for="duration">作答時間</label>
+                  <div class="select-wrap"><select id="duration"><option value="0">不限時</option><option value="20" selected>20 分鐘</option><option value="30">30 分鐘</option></select><span class="select-chevron">⌄</span></div>
+                </div>
+              </div>
+              <p class="bank-note"><span>✦</span> 章節參照課綱與常見課本編排；高一上六個小節目前各有至少 50 題。新收錄題目先提供正解，詳解待後續補充。</p>
+            </section>
+
+            <aside class="preview-column">
+              <div class="preview-card card">
+                <div class="preview-header"><div><span class="preview-kicker">PAPER PREVIEW</span><h2>本次練習預覽</h2></div><span class="preview-mark">✳</span></div>
+                <div class="preview-illustration" aria-hidden="true"><div class="paper-back"></div><div class="paper-front"><span class="paper-line short"></span><span class="paper-line"></span><span class="paper-line"></span><span class="paper-choice"><i></i><i></i><i></i></span><span class="paper-line medium"></span></div><span class="pencil">✎</span><span class="illustration-star">✳</span></div>
+                <div class="preview-summary">
+                  <div class="summary-line"><span>練習範圍</span><strong id="summary-range">國中七年級數學</strong></div>
+                  <div class="summary-line"><span>已選單元</span><strong id="summary-topics">0 個單元</strong></div>
+                  <div class="summary-line"><span>預計題數</span><strong id="summary-count">最多 0 題</strong></div>
+                  <div class="summary-line"><span>考卷形式</span><strong id="summary-settings">20 分鐘 · 基礎到進階</strong></div>
+                </div>
+                <div class="preview-separator"></div>
+                <div class="preview-includes"><span class="include-icon">✓</span><span>每道題目都附有答案與逐步詳解</span></div>
+                <button class="primary-button" id="start-button" type="button" disabled><span>建立我的練習卷</span><span class="button-arrow">→</span></button>
+                <p class="button-note" id="button-note">先勾選想練習的單元</p>
+              </div>
+              <div class="tip-card"><span class="tip-icon">✦</span><div><strong>練習小提醒</strong><p>先試著自己完成，再看詳解找出可以更好的解法。</p></div></div>
+            </aside>
+          </div>
+          <footer class="page-footer"><span>歆羽 · 讓每一次練習，都更靠近理解。</span><a href="https://www.naer.edu.tw/PageSyllabus?fid=52" target="_blank" rel="noreferrer">參考國教院 108 課綱 ↗</a></footer>
+        </section>
+
+        <section class="view exam-view" id="exam-view" hidden>
+          <div class="exam-topline"><button class="back-button" id="back-to-setup" type="button">← 返回範圍設定</button><span class="exam-label">自主練習 · 數學</span></div>
+          <div class="exam-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> YOUR PRACTICE PAPER</div><h1>專注作答，<br class="mobile-break" />照自己的步調來。</h1><p class="intro-copy" id="exam-subtitle"></p></div><div class="timer-card" id="timer-card"><span class="timer-icon">◷</span><span><small>剩餘時間</small><strong id="timer-display">20:00</strong></span></div></div>
+          <div class="exam-layout">
+            <section class="question-card card" id="question-card"></section>
+            <aside class="question-side card"><div class="question-side-head"><strong>題目導覽</strong><span id="answered-count">0 / 0 已作答</span></div><div class="question-dots" id="question-dots"></div><div class="legend"><span><i class="legend-current"></i>目前題目</span><span><i class="legend-answered"></i>已作答</span></div><div class="exam-side-note"><span>✦</span><p>可以先跳過不確定的題目，稍後再回來作答。</p></div></aside>
+          </div>
+        </section>
+
+        <section class="view result-view" id="result-view" hidden>
+          <div class="result-hero"><div class="result-confetti">✳</div><div class="eyebrow"><span class="eyebrow-line"></span> PRACTICE COMPLETE</div><h1 id="result-title">完成今天的練習！</h1><p id="result-subtitle">每一次思考，都是往前的一步。</p><div class="score-row"><div class="score-main"><span>本次得分</span><strong id="score-value">0</strong><small>分</small></div><div class="score-divider"></div><div class="score-stat"><strong id="correct-value">0 / 0</strong><span>答對題數</span></div><div class="score-stat"><strong id="elapsed-value">0 分鐘</strong><span>作答時間</span></div></div></div>
+          <div class="review-heading"><div><div class="eyebrow"><span class="eyebrow-line"></span> ANSWER REVIEW</div><h2>逐題檢視與詳解</h2><p>看懂步驟，也看看自己在哪裡卡住。</p></div><button class="outline-button" id="retry-button" type="button">再練一次 <span>↻</span></button></div>
+          <div class="review-list" id="review-list"></div>
+          <div class="result-bottom"><button class="primary-button compact" id="finish-button" type="button"><span>回到範圍設定</span><span class="button-arrow">→</span></button></div>
+        </section>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="question-bank-high1.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
