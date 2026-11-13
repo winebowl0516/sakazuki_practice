@@ -59,15 +59,15 @@ const curriculum = {
       chapter("j7-c3", "一元一次方程式", "first", lesson("j7-l5", "代數式與式的運算"), lesson("j7-l6", "一元一次方程式", "equation")),
       chapter("j7-c4", "比例與線型關係", "second", lesson("j7-l7", "比例式與正反比"), lesson("j7-l8", "生活中的比例問題")),
       chapter("j7-c5", "幾何圖形", "second", lesson("j7-l9", "基本幾何與角度"), lesson("j7-l10", "三角形內角和", "geometry")),
-      chapter("j7-c6", "統計圖表", "second", lesson("j7-l11", "資料整理與統計圖"), lesson("j7-l12", "資料判讀", "geometry")),
+      chapter("j7-c6", "統計圖表", "second", lesson("j7-l11", "資料整理與統計圖", "statistics"), lesson("j7-l12", "資料判讀", "statistics")),
     ],
     8: [
-      chapter("j8-c1", "乘法公式與多項式", "first", lesson("j8-l1", "乘法公式"), lesson("j8-l2", "多項式運算與因式分解", "number")),
+      chapter("j8-c1", "乘法公式與多項式", "first", lesson("j8-l1", "乘法公式", "algebra"), lesson("j8-l2", "多項式運算與因式分解", "algebra")),
       chapter("j8-c2", "二元一次聯立方程式", "first", lesson("j8-l3", "聯立方程式的解", "equation"), lesson("j8-l4", "聯立方程式應用", "equation")),
       chapter("j8-c3", "直角坐標與一次函數", "first", lesson("j8-l5", "坐標平面", "coordinate"), lesson("j8-l6", "一次函數與圖形", "function")),
       chapter("j8-c4", "三角形與四邊形", "second", lesson("j8-l7", "全等與三角形性質"), lesson("j8-l8", "平行四邊形與特殊四邊形", "geometry")),
       chapter("j8-c5", "幾何證明與尺規作圖", "second", lesson("j8-l9", "幾何推理"), lesson("j8-l10", "尺規作圖")),
-      chapter("j8-c6", "統計資料", "second", lesson("j8-l11", "平均數、中位數與眾數"), lesson("j8-l12", "資料分布與判讀", "geometry")),
+      chapter("j8-c6", "統計資料", "second", lesson("j8-l11", "平均數、中位數與眾數", "statistics"), lesson("j8-l12", "資料分布與判讀", "statistics")),
     ],
     9: [
       chapter("j9-c1", "相似形", "first", lesson("j9-l1", "比例線段與相似"), lesson("j9-l2", "相似形的面積與應用")),
@@ -75,7 +75,7 @@ const curriculum = {
       chapter("j9-c3", "幾何與三角比", "first", lesson("j9-l5", "幾何證明與應用"), lesson("j9-l6", "直角三角形與三角比")),
       chapter("j9-c4", "二次函數", "second", lesson("j9-l7", "平方函數與圖形", "function"), lesson("j9-l8", "二次函數的最大最小值", "function")),
       chapter("j9-c5", "二次方程式", "second", lesson("j9-l9", "因式分解解方程式"), lesson("j9-l10", "二次方程式與應用", "equation")),
-      chapter("j9-c6", "統計與機率", "second", lesson("j9-l11", "機率與樣本空間"), lesson("j9-l12", "資料分析", "geometry")),
+      chapter("j9-c6", "統計與機率", "second", lesson("j9-l11", "機率與樣本空間", "probability"), lesson("j9-l12", "資料分析", "statistics")),
     ],
   },
   senior: {
@@ -123,7 +123,7 @@ const curriculum = {
 };
 
 // 題庫同時收錄原創練習與公開歷屆題；每題可附來源、答案及逐步解說。
-const questionBank = [...(window.high1QuestionBank || []), ...(window.high1SecondSemesterQuestionBank || []),
+const questionBank = [...(window.high1QuestionBank || []), ...(window.high1SecondSemesterQuestionBank || []), ...(window.junior7QuestionBank || []), ...(window.junior8QuestionBank || []), ...(window.junior9QuestionBank || []),
   { id: "e-n1", stage: "elementary", topic: "number", difficulty: "basic", prompt: "計算：48 ÷ 6 ＋ 3 × 2 ＝？", options: ["11", "14", "19", "22"], answer: 1, explanation: "先算乘除，再算加減。48 ÷ 6 ＝ 8，3 × 2 ＝ 6，所以 8 ＋ 6 ＝ 14。" },
   { id: "e-n2", stage: "elementary", topic: "number", difficulty: "challenge", prompt: "一盒彩色筆有 12 枝，買 7 盒後送給同學 18 枝，還剩下幾枝？", options: ["54 枝", "60 枝", "66 枝", "84 枝"], answer: 2, explanation: "先求彩色筆總數：12 × 7 ＝ 84 枝；再扣掉送出的 18 枝：84 − 18 ＝ 66 枝。" },
   { id: "e-f1", stage: "elementary", topic: "fraction", difficulty: "basic", prompt: "計算：3/4 − 1/8 ＝？", options: ["1/2", "5/8", "2/3", "7/8"], answer: 1, explanation: "先通分成相同分母：3/4 ＝ 6/8。再相減：6/8 − 1/8 ＝ 5/8。" },
@@ -199,7 +199,7 @@ const questionBank = [...(window.high1QuestionBank || []), ...(window.high1Secon
 const questionGrades = {
   "e1-n1": 1, "e1-g1": 1, "e2-n1": 2, "e2-m1": 2, "e3-n1": 3, "e3-f1": 3,
   "e-n1": 4, "e-n2": 4, "e-m1": 4, "e-m2": 4, "e-g1": 4, "e-f1": 5, "e-f2": 5, "e-g2": 5, "e6-r1": 6, "e6-r2": 6,
-  "j-n1": 7, "j-n2": 8, "j-e1": 7, "j-e2": 7, "j-f1": 8, "j-f2": 8, "j-g1": 7, "j-g2": 9, "j9-e1": 9, "j9-f1": 9,
+  "j-n1": 7, "j-n2": 7, "j-e1": 7, "j-e2": 7, "j-f1": 8, "j-f2": 8, "j-g1": 7, "j-g2": 9, "j9-e1": 9, "j9-f1": 9,
   "cap114-math-01": 7, "cap114-math-02": 8, "cap114-math-04": 8, "cap114-math-06": 8,
   "s-x1": 10, "s-x2": 10, "s-s1": 10, "s-s2": 10, "s-t1": 11, "s-t2": 11, "s-p1": 10, "s-p2": 12, "s11-p1": 11, "s-exp2": 10,
   "s-num1": 10, "s-num2": 10, "s-line1": 10, "s-line2": 10, "s-circle1": 10, "s-poly1": 10, "s-poly2": 10,
@@ -214,6 +214,9 @@ const questionCourses = {
   "b-mean1": ["B"], "b-expected1": ["B"], "b-red1": ["B"], "b-union1": ["B"], "b-model1": ["B"], "b-percent1": ["B"],
 };
 const questionLessons = {
+  "j-n1": ["j7-l2"], "j-n2": ["j7-l4"], "j-e1": ["j7-l6"], "j-e2": ["j7-l6"], "j-g1": ["j7-l10"],
+  "j-f1": ["j8-l6"], "j-f2": ["j8-l6"], "j-g2": ["j9-l12"], "j9-e1": ["j9-l9"], "j9-f1": ["j9-l8"],
+  "cap114-math-01": ["j7-l4"], "cap114-math-02": ["j8-l2"], "cap114-math-04": ["j8-l3"], "cap114-math-06": ["j8-l5"],
   "s-x1": ["sR10-l8"], "s-x2": ["sR10-l6"], "s-s1": ["sR10-l9"], "s-s2": ["sR10-l10"],
   "s-t1": ["sA11-l1"], "s-t2": ["sA11-l3"], "s-p1": ["sR10-l12"], "s-p2": ["sA12-l8", "sB12-l5"],
   "s11-p1": ["sA11-l7", "sB11-l4"], "s-exp2": ["sR10-l7"],
@@ -229,9 +232,9 @@ const questionLessons = {
 questionBank.forEach((question) => {
   question.grade = questionGrades[question.id] ?? question.grade;
   question.provenance = question.provenance || (question.sourceLabel ? "public-exam" : "original");
+  question.lessonIds = questionLessons[question.id] || question.lessonIds || [];
   if (question.stage === "senior") {
     question.courses = questionCourses[question.id] || question.courses || ["A", "B"];
-    question.lessonIds = questionLessons[question.id] || question.lessonIds || [];
     question.provenance = "original";
     question.curriculumReference = question.curriculumReference || "國教院 108 課綱數學領域";
     question.answerCheck = question.answerCheck || "solution-checked";
@@ -291,8 +294,11 @@ function getAvailableQuestions() {
     if (question.stage !== currentStage || question.grade !== Number(gradeSelect.value)) return false;
     if (currentStage === "senior") {
       if (!question.courses.includes(courseSelect.value) || !question.lessonIds.some((id) => selectedUnits.some((unit) => unit.id === id))) return false;
-    } else if (!selectedBankTopics.has(question.topic)) return false;
+    } else if (question.grade === 7 || question.grade === 8 || question.grade === 9
+      ? !question.lessonIds?.some((id) => selectedUnits.some((unit) => unit.id === id))
+      : !selectedBankTopics.has(question.topic)) return false;
     if (difficulty === "basic" && question.difficulty !== "basic") return false;
+    if (difficulty === "standard" && question.difficulty !== "standard") return false;
     if (difficulty === "challenge" && question.difficulty !== "challenge") return false;
     return true;
   });
@@ -300,6 +306,11 @@ function getAvailableQuestions() {
 
 function renderGrades() {
   const grades = gradeOptions[currentStage];
+  const standardDifficulty = document.querySelector('#difficulty option[value="standard"]');
+  standardDifficulty.disabled = currentStage !== "junior";
+  if (standardDifficulty.disabled && document.getElementById("difficulty").value === "standard") {
+    document.getElementById("difficulty").value = "mixed";
+  }
   const previousGrade = Number(gradeSelect.value);
   gradeSelect.innerHTML = grades.map((grade) => `<option value="${grade}">${stageNames[currentStage]}${grade}年級</option>`).join("");
   gradeSelect.value = grades.includes(previousGrade) ? String(previousGrade) : String(grades[0]);
@@ -316,11 +327,12 @@ function renderTopics() {
     const selectedCount = lessonIds.filter((id) => selectedTopics.has(id)).length;
     const allSelected = selectedCount === lessonIds.length;
     const bankTopics = new Set(item.lessons.map((itemLesson) => itemLesson.bankTopic).filter(Boolean));
-    const chapterQuestionCount = questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && (currentStage === "senior" ? question.lessonIds?.some((id) => lessonIds.includes(id)) && question.courses.includes(courseSelect.value) : bankTopics.has(question.topic))).length;
+    const chapterQuestionCount = questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && (currentStage === "senior" ? question.lessonIds?.some((id) => lessonIds.includes(id)) && question.courses.includes(courseSelect.value) : gradeSelect.value === "7" || gradeSelect.value === "8" || gradeSelect.value === "9" ? question.lessonIds?.some((id) => lessonIds.includes(id)) : bankTopics.has(question.topic))).length;
     const lessonMarkup = item.lessons.map((itemLesson) => {
       const count = currentStage === "senior"
         ? questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && question.lessonIds?.includes(itemLesson.id) && question.courses.includes(courseSelect.value)).length
-        : itemLesson.bankTopic ? questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && question.topic === itemLesson.bankTopic).length : 0;
+        : gradeSelect.value === "7" || gradeSelect.value === "8" || gradeSelect.value === "9" ? questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && question.lessonIds?.includes(itemLesson.id)).length
+          : itemLesson.bankTopic ? questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && question.topic === itemLesson.bankTopic).length : 0;
       const selected = selectedTopics.has(itemLesson.id);
       return `<button type="button" class="lesson-option${selected ? " selected" : ""}" data-topic="${itemLesson.id}" aria-pressed="${selected}">
         <span class="topic-checkbox">${selected ? "✓" : ""}</span><span class="lesson-title">${itemLesson.title}</span>
@@ -346,7 +358,7 @@ function updatePreview() {
   const available = getAvailableQuestions().length;
   const requested = Number(document.getElementById("question-count").value);
   const duration = Number(document.getElementById("duration").value);
-  const difficultyLabel = { mixed: "基礎到進階", basic: "基礎觀念", challenge: "進階挑戰" }[document.getElementById("difficulty").value];
+  const difficultyLabel = { mixed: "混合難度", basic: "基礎", standard: "標準", challenge: "挑戰" }[document.getElementById("difficulty").value];
 
   document.getElementById("summary-range").textContent = stageGradeLabel();
   document.getElementById("summary-topics").textContent = names.length ? `${names.length} 個小節 · ${names.slice(0, 2).join("、")}${names.length > 2 ? "…" : ""}` : "尚未選擇";
@@ -356,9 +368,9 @@ function updatePreview() {
 
   const note = document.getElementById("button-note");
   if (!names.length) note.textContent = "先勾選想練習的單元";
-  else if (!available) note.textContent = "這個難度目前沒有對應的示範題";
+  else if (!available) note.textContent = "這個難度目前沒有對應題目";
   else if (available < requested) note.textContent = `目前題庫有 ${available} 題，會依現有題目建立練習卷`;
-  else note.textContent = `${available} 道符合範圍的原創示範題`;
+  else note.textContent = `${available} 道符合範圍的題目`;
 }
 
 function showToast(message) {
