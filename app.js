@@ -256,6 +256,8 @@ let timerId = null;
 let remainingSeconds = 0;
 let startedAt = 0;
 let toastTimer = null;
+let activeLibrary = "";
+let latestSession = null;
 
 const gradeSelect = document.getElementById("grade-select");
 const courseField = document.getElementById("course-field");
@@ -395,8 +397,194 @@ function switchView(viewName) {
     view.hidden = !active;
     view.classList.toggle("active", active);
   });
-  document.getElementById("breadcrumb-current").textContent = viewName === "setup" ? "開始練習" : viewName === "exam" ? "作答中" : "練習結果";
+  const labels = { setup: "開始練習", exam: "作答中", result: "練習結果", favorites: "錯題收藏", history: "學習紀錄" };
+  document.getElementById("breadcrumb-current").textContent = labels[viewName] || "開始練習";
+  document.querySelectorAll("[data-library]").forEach((button) => button.classList.toggle("active", button.dataset.library === viewName));
+  document.querySelector('.nav-link[href="#home"]')?.classList.toggle("active", viewName === "setup");
+  activeLibrary = viewName === "favorites" || viewName === "history" ? viewName : "";
   window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function openAuthDialog(message = "") {
+  const dialog = document.getElementById("auth-dialog");
+  document.getElementById("auth-error").textContent = message;
+  if (!dialog.open) dialog.showModal();
+}
+
+function updateCloudUI({ status, user }) {
+  const loginButton = document.getElementById("google-login-button");
+  const label = document.getElementById("google-login-label");
+  const signInButton = document.getElementById("auth-sign-in");
+  const signOutButton = document.getElementById("auth-sign-out");
+  const setupNote = document.getElementById("auth-setup-note");
+  const error = document.getElementById("auth-error");
+  const dialog = document.getElementById("auth-dialog");
+  loginButton.classList.toggle("signed-in", Boolean(user));
+  label.textContent = user ? `已登入 · ${user.displayName || "Google"}` : status === "loading" ? "準備登入…" : "使用 Google 登入";
+  loginButton.setAttribute("aria-label", user ? "管理 Google 帳號" : "使用 Google 登入並保存學習成果");
+  signInButton.hidden = Boolean(user);
+  signOutButton.hidden = !user;
+  setupNote.hidden = status !== "unconfigured";
+  if (status === "unavailable") error.textContent = window.studyCloud?.error || "Firebase 連線失敗，請確認網路後重新整理。";
+  if (user && dialog.open) dialog.close();
+  if (activeLibrary && user) loadLibrary(activeLibrary);
+  if (user) {
+    if (latestSession) saveLatestSession();
+    else refreshFavoriteButtons();
+  } else {
+    if (activeLibrary) switchView("setup");
+    document.getElementById("favorites-list").replaceChildren();
+    document.getElementById("history-list").replaceChildren();
+    document.getElementById("history-detail").replaceChildren();
+    document.getElementById("history-detail").hidden = true;
+    document.querySelectorAll("[data-save-question]").forEach((button) => {
+      button.textContent = "♡ 收藏錯題";
+      button.classList.remove("saved");
+      button.dataset.saved = "false";
+      button.disabled = false;
+    });
+  }
+}
+
+function requireCloudLogin(message) {
+  const cloud = window.studyCloud;
+  if (cloud?.user && cloud.status === "ready") return true;
+  if (cloud?.status === "unavailable") openAuthDialog(cloud.error || "Firebase 連線失敗，請稍後再試。");
+  else if (cloud?.status === "loading") openAuthDialog("登入服務正在連線，請稍候再試。");
+  else openAuthDialog(message || "登入 Google 帳號後，即可保存錯題收藏與學習紀錄。");
+  return false;
+}
+
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+function formatCloudDate(timestamp) {
+  const date = timestamp?.toDate ? timestamp.toDate() : timestamp ? new Date(timestamp) : null;
+  return date && !Number.isNaN(date.getTime()) ? new Intl.DateTimeFormat("zh-TW", { dateStyle: "medium", timeStyle: "short" }).format(date) : "剛剛完成";
+}
+
+function renderSessionPaper(session) {
+  const list = document.getElementById("history-list");
+  const detail = document.getElementById("history-detail");
+  const questions = Array.isArray(session.questions) ? session.questions : [];
+  list.hidden = true;
+  detail.hidden = false;
+  const questionMarkup = questions.length ? questions.map((question, index) => {
+    const userAnswer = question.userAnswer === null || question.userAnswer === undefined ? "未作答" : question.options?.[question.userAnswer] ?? "—";
+    const correctAnswer = question.options?.[question.answer] ?? "—";
+    const isCorrect = question.userAnswer === question.answer;
+    const status = question.userAnswer === null || question.userAnswer === undefined ? "未作答" : isCorrect ? "答對" : "再複習";
+    const statusClass = question.userAnswer === null || question.userAnswer === undefined ? "unanswered" : isCorrect ? "correct" : "incorrect";
+    const sourceLine = question.sourceLabel
+      ? `<div class="question-source">來源：<a href="${escapeHtml(question.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(question.sourceLabel)}</a>${question.answerSourceUrl ? ` · <a href="${escapeHtml(question.answerSourceUrl)}" target="_blank" rel="noopener noreferrer">官方參考答案</a>` : ""}</div>`
+      : `<div class="question-source">原創練習題</div>`;
+    const explanation = question.explanation
+      ? `<div class="explanation-box"><strong>解題思路</strong><br>${escapeHtml(question.explanation)}</div>`
+      : `<div class="explanation-box"><strong>詳解待補</strong><br>本題已收錄正確答案，完整解說將於後續補充。</div>`;
+    return `<article class="review-card"><div class="review-card-head"><span class="review-status ${statusClass}">${status}</span><span class="review-topic">${escapeHtml(question.topicName || "數學單元")} · 第 ${index + 1} 題</span></div><p class="review-q">${escapeHtml(question.prompt)}</p>${sourceLine}<div class="review-answer"><span>你的答案：<strong>${escapeHtml(userAnswer)}</strong></span><span>正確答案：<strong>${escapeHtml(correctAnswer)}</strong></span></div>${explanation}</article>`;
+  }).join("") : '<div class="library-empty">這份紀錄建立時尚未保存題目內容，因此無法顯示原試題。</div>';
+  detail.innerHTML = `<div class="history-detail-heading"><button class="outline-button" type="button" data-history-back>← 返回學習紀錄</button><div><h2>${escapeHtml(session.stageLabel || "數學練習")}</h2><p>${escapeHtml(formatCloudDate(session.createdAt))} · ${escapeHtml(session.correct)} / ${escapeHtml(session.total)} 題答對 · ${escapeHtml(session.score)} 分 · 作答 ${escapeHtml(session.elapsedMinutes)} 分鐘</p></div></div><div class="review-list">${questionMarkup}</div>`;
+  detail.querySelector("[data-history-back]").addEventListener("click", () => {
+    detail.hidden = true;
+    list.hidden = false;
+  });
+}
+
+async function loadLibrary(type) {
+  if (!requireCloudLogin()) return;
+  const requestingUser = window.studyCloud.user.uid;
+  const container = document.getElementById(type === "favorites" ? "favorites-list" : "history-list");
+  if (type === "history") {
+    container.hidden = false;
+    document.getElementById("history-detail").hidden = true;
+  }
+  container.innerHTML = '<div class="library-loading">正在載入你的學習資料…</div>';
+  try {
+    if (type === "favorites") {
+      const favorites = await window.studyCloud.getFavorites();
+      if (window.studyCloud.user?.uid !== requestingUser) return;
+      if (!favorites.length) {
+        container.innerHTML = '<div class="library-empty">目前還沒有收藏的錯題。<br>完成練習後，把想再挑戰的題目加入收藏吧。</div>';
+        return;
+      }
+      container.innerHTML = favorites.map((question) => `<article class="review-card" data-library-question="${escapeHtml(question.questionId || question.id)}"><div class="review-card-head"><span class="review-status incorrect">錯題收藏</span><span class="review-topic">${escapeHtml(question.topicName || "數學單元")}${question.grade ? ` · ${escapeHtml(question.grade)} 年級` : ""}</span><button class="favorite-toggle saved" type="button" data-remove-favorite="${escapeHtml(question.questionId || question.id)}">移除收藏</button></div><p class="review-q">${escapeHtml(question.prompt)}</p><div class="review-answer"><span>正確答案：<strong>${escapeHtml(question.options?.[question.answer] ?? "")}</strong></span></div>${question.explanation ? `<div class="explanation-box"><strong>解題思路</strong><br>${escapeHtml(question.explanation)}</div>` : '<div class="explanation-box"><strong>詳解待補</strong></div>'}</article>`).join("");
+      container.querySelectorAll("[data-remove-favorite]").forEach((button) => button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await window.studyCloud.setFavorite({ id: button.dataset.removeFavorite }, false);
+          showToast("已從錯題收藏移除");
+          loadLibrary("favorites");
+        } catch (error) {
+          showToast(error.message || "移除失敗，請稍後再試");
+          button.disabled = false;
+        }
+      }));
+      return;
+    }
+    const sessions = await window.studyCloud.getSessions();
+    if (window.studyCloud.user?.uid !== requestingUser) return;
+    if (!sessions.length) {
+      container.innerHTML = '<div class="library-empty">還沒有練習紀錄。<br>完成第一份練習卷後，成果就會顯示在這裡。</div>';
+      return;
+    }
+    container.innerHTML = sessions.map((session) => `<button class="session-card" type="button" data-open-session="${escapeHtml(session.id)}" aria-label="開啟${escapeHtml(session.stageLabel || "數學練習")}試題"><strong class="session-score">${escapeHtml(session.score)}<small> 分</small></strong><div class="session-details"><strong>${escapeHtml(session.stageLabel || "數學練習")}</strong><span>${escapeHtml(session.correct)} / ${escapeHtml(session.total)} 題答對 · 作答 ${escapeHtml(session.elapsedMinutes)} 分鐘${session.missedCount ? ` · ${escapeHtml(session.missedCount)} 題待複習` : ""}</span></div><time class="session-date">${escapeHtml(formatCloudDate(session.createdAt))}</time><span class="session-open-hint">查看試題 →</span></button>`).join("");
+    container.querySelectorAll("[data-open-session]").forEach((button) => button.addEventListener("click", () => {
+      const session = sessions.find((item) => item.id === button.dataset.openSession);
+      if (session) renderSessionPaper(session);
+    }));
+  } catch (error) {
+    if (window.studyCloud.user?.uid !== requestingUser) return;
+    container.innerHTML = `<div class="library-empty">目前無法載入資料：${escapeHtml(error.message || "請稍後再試")}</div>`;
+  }
+}
+
+async function refreshFavoriteButtons() {
+  const cloud = window.studyCloud;
+  if (!cloud?.user || cloud.status !== "ready" || !cloud.isFavorite) return;
+  const requestingUser = cloud.user.uid;
+  const buttons = [...document.querySelectorAll("[data-save-question]")];
+  buttons.forEach((button) => { button.disabled = true; });
+  await Promise.all(buttons.map(async (button) => {
+    try {
+      const saved = await cloud.isFavorite(button.dataset.saveQuestion);
+      if (window.studyCloud.user?.uid !== requestingUser) return;
+      button.textContent = saved ? "已收藏 · 移除" : "♡ 收藏錯題";
+      button.classList.toggle("saved", saved);
+      button.disabled = false;
+      button.dataset.saved = String(saved);
+    } catch {
+      button.disabled = false;
+    }
+  }));
+}
+
+async function saveLatestSession() {
+  const cloud = window.studyCloud;
+  if (!latestSession || !cloud?.user || cloud.status !== "ready" || latestSession.saving) return;
+  const session = latestSession;
+  session.saving = true;
+  let newlyAddedFavorites = 0;
+  try {
+    if (!session.saved) {
+      await cloud.saveSession(session.data);
+      session.saved = true;
+    }
+    if (!session.favoritesSaved) {
+      const missedQuestions = session.data.questions.filter((question) => question.userAnswer !== question.answer);
+      if (missedQuestions.length) {
+        const added = await Promise.all(missedQuestions.map((question) => cloud.addFavoriteIfMissing({ ...question, id: question.questionId, courseName: session.data.stageLabel })));
+        newlyAddedFavorites = added.filter(Boolean).length;
+      }
+      session.favoritesSaved = true;
+    }
+    refreshFavoriteButtons();
+    showToast(newlyAddedFavorites ? "練習已保存，答錯或未作答的題目已加入錯題收藏" : "這次練習已保存到學習紀錄");
+  } catch (error) {
+    showToast(error.message || "學習資料保存失敗，請稍後再試");
+  } finally {
+    session.saving = false;
+  }
 }
 
 function shuffle(items) {
@@ -519,6 +707,36 @@ function showResults(timeUp) {
   const score = quizItems.length ? Math.round((correct / quizItems.length) * 100) : 0;
   const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
   const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+  const missedQuestions = quizItems.filter((question, index) => answers[index] !== question.answer);
+  latestSession = {
+    saved: false,
+    data: {
+      stageLabel: stageGradeLabel(),
+      score,
+      correct,
+      total: quizItems.length,
+      elapsedMinutes,
+      elapsedSeconds,
+      missedCount: missedQuestions.length,
+      missedQuestionIds: missedQuestions.map((question) => question.id),
+      questions: quizItems.map((question, index) => ({
+        questionId: question.id,
+        stage: question.stage || currentStage,
+        grade: question.grade ?? Number(gradeSelect.value),
+        courseName: stageGradeLabel(),
+        topicName: question.topicName || "數學單元",
+        prompt: question.prompt,
+        options: [...question.options],
+        answer: question.answer,
+        userAnswer: answers[index],
+        explanation: question.explanation || "",
+        sourceLabel: question.sourceLabel || "",
+        sourceUrl: question.sourceUrl || "",
+        answerSourceUrl: question.answerSourceUrl || "",
+      })),
+      finishedAt: new Date().toISOString(),
+    },
+  };
   document.getElementById("score-value").textContent = String(score);
   document.getElementById("correct-value").textContent = `${correct} / ${quizItems.length}`;
   document.getElementById("elapsed-value").textContent = `${elapsedMinutes} 分鐘`;
@@ -540,9 +758,30 @@ function showResults(timeUp) {
     const explanation = question.explanation
       ? `<div class="explanation-box"><strong>解題思路</strong><br />${question.explanation}</div>`
       : `<div class="explanation-box"><strong>詳解待補</strong><br />本題已收錄正確答案，完整解說將於後續補充。</div>`;
-    return `<article class="review-card"><div class="review-card-head"><span class="review-status ${statusClass}">${status}</span><span class="review-topic">${question.topicName} · 第 ${index + 1} 題</span></div><p class="review-q">${question.prompt}</p>${sourceLine}<div class="review-answer"><span>你的答案：<strong>${userAnswer}</strong></span><span>正確答案：<strong>${correctAnswer}</strong></span></div>${explanation}</article>`;
+    const favoriteAction = isCorrect ? "" : `<button class="favorite-toggle" type="button" data-save-question="${question.id}" data-saved="false">♡ 收藏錯題</button>`;
+    return `<article class="review-card"><div class="review-card-head"><span class="review-status ${statusClass}">${status}</span><span class="review-topic">${question.topicName} · 第 ${index + 1} 題</span>${favoriteAction}</div><p class="review-q">${question.prompt}</p>${sourceLine}<div class="review-answer"><span>你的答案：<strong>${userAnswer}</strong></span><span>正確答案：<strong>${correctAnswer}</strong></span></div>${explanation}</article>`;
   }).join("");
+  document.querySelectorAll("[data-save-question]").forEach((button) => button.addEventListener("click", async () => {
+    if (!requireCloudLogin("登入後即可收藏錯題，並在其他裝置繼續複習。")) return;
+    const question = quizItems.find((item) => item.id === button.dataset.saveQuestion);
+    if (!question || button.disabled) return;
+    button.disabled = true;
+    try {
+      const saved = await window.studyCloud.isFavorite(question.id);
+      await window.studyCloud.setFavorite({ ...question, courseName: stageGradeLabel() }, !saved);
+      button.dataset.saved = String(!saved);
+      button.classList.toggle("saved", !saved);
+      button.textContent = saved ? "♡ 收藏錯題" : "已收藏 · 移除";
+      showToast(saved ? "已從錯題收藏移除" : "已加入錯題收藏");
+    } catch (error) {
+      showToast(error.message || "收藏失敗，請稍後再試");
+    } finally {
+      button.disabled = false;
+    }
+  }));
+  refreshFavoriteButtons();
   switchView("result");
+  saveLatestSession();
 }
 
 function resetToSetup() {
@@ -642,6 +881,47 @@ document.getElementById("retry-button").addEventListener("click", () => {
   startTimer();
 });
 document.getElementById("finish-button").addEventListener("click", resetToSetup);
+document.querySelector('.nav-link[href="#home"]').addEventListener("click", (event) => {
+  event.preventDefault();
+  switchView("setup");
+});
 document.querySelectorAll("[data-toast]").forEach((button) => button.addEventListener("click", () => showToast(button.dataset.toast)));
+document.querySelectorAll("[data-library]").forEach((button) => button.addEventListener("click", () => {
+  const view = button.dataset.library;
+  if (!requireCloudLogin("登入 Google 帳號後，即可使用錯題收藏與學習紀錄。")) return;
+  switchView(view);
+  loadLibrary(view);
+}));
+document.querySelectorAll("[data-library-back]").forEach((button) => button.addEventListener("click", resetToSetup));
+document.getElementById("google-login-button").addEventListener("click", () => openAuthDialog());
+document.getElementById("auth-close").addEventListener("click", () => document.getElementById("auth-dialog").close());
+document.getElementById("auth-sign-in").addEventListener("click", async () => {
+  const cloud = window.studyCloud;
+  const error = document.getElementById("auth-error");
+  if (cloud?.status === "unconfigured") {
+    document.getElementById("auth-setup-note").hidden = false;
+    return;
+  }
+  if (cloud?.status === "loading") {
+    error.textContent = "登入服務正在連線，請稍候再試。";
+    return;
+  }
+  if (!cloud?.signIn) {
+    error.textContent = cloud?.error || "登入服務目前無法使用，請重新整理後再試。";
+    return;
+  }
+  error.textContent = "正在連接 Google…";
+  const result = await cloud.signIn();
+  if (!result.ok) error.textContent = result.message;
+});
+document.getElementById("auth-sign-out").addEventListener("click", async () => {
+  const result = await window.studyCloud?.signOut?.();
+  if (result?.ok) {
+    document.getElementById("auth-dialog").close();
+    showToast("已登出 Google 帳號");
+  } else if (result?.message) document.getElementById("auth-error").textContent = result.message;
+});
+window.addEventListener("study-cloud-state", (event) => updateCloudUI(event.detail));
+if (window.studyCloud) updateCloudUI(window.studyCloud);
 
 renderGrades();
