@@ -22,8 +22,12 @@ Firebase Web app 設定已填入 [`firebase-config.js`](firebase-config.js)。We
 
 ## 開啟網站與授權網域
 
-Firebase Authentication 已將 `localhost` 加入授權網域。請使用本機靜態伺服器或正式網站網址開啟 `index.html`；直接以 `file://` 開啟時，瀏覽器會限制 Firebase 所需的 ES modules 與 Google OAuth。
+Firebase Authentication 已授權以下網域：
 
-網站正式部署後，請到 Firebase Console 的 **Authentication → Settings → Authorized domains** 加入正式網域。尚未知道網站正式網域，所以目前只設定本機開發所需的 `localhost`。
+- `localhost`：本機開發
+- `xinyu-math-practice.firebaseapp.com`、`xinyu-math-practice.web.app`：Firebase 預設網域
+- `winebowl0516.github.io`：GitHub Pages 正式網站（2026-11-15 加入）
+
+若更換正式網站網域，請到 Firebase Console 的 **Authentication → Settings → Authorized domains** 加入新的主機名稱。請使用本機靜態伺服器或正式網站網址開啟 `index.html`；直接以 `file://` 開啟時，瀏覽器會限制 Firebase 所需的 ES modules 與 Google OAuth。
 
 未登入時仍可選範圍、作答和查看結果；登入 Google 帳號後，才可儲存錯題收藏與學習紀錄。
