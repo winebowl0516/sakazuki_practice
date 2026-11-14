@@ -123,7 +123,7 @@ const curriculum = {
 };
 
 // 題庫同時收錄原創練習與公開歷屆題；每題可附來源、答案及逐步解說。
-const questionBank = [...(window.high1QuestionBank || []), ...(window.high1SecondSemesterQuestionBank || []), ...(window.high2QuestionBank || []), ...(window.high3QuestionBank || []), ...(window.junior7QuestionBank || []), ...(window.junior8QuestionBank || []), ...(window.junior9QuestionBank || []),
+const questionBank = [...(window.elementary1QuestionBank || []), ...(window.elementary2QuestionBank || []), ...(window.elementary3QuestionBank || []), ...(window.elementary4QuestionBank || []), ...(window.elementary5QuestionBank || []), ...(window.elementary6QuestionBank || []), ...(window.high1QuestionBank || []), ...(window.high1SecondSemesterQuestionBank || []), ...(window.high2QuestionBank || []), ...(window.high3QuestionBank || []), ...(window.junior7QuestionBank || []), ...(window.junior8QuestionBank || []), ...(window.junior9QuestionBank || []),
   { id: "e-n1", stage: "elementary", topic: "number", difficulty: "basic", prompt: "計算：48 ÷ 6 ＋ 3 × 2 ＝？", options: ["11", "14", "19", "22"], answer: 1, explanation: "先算乘除，再算加減。48 ÷ 6 ＝ 8，3 × 2 ＝ 6，所以 8 ＋ 6 ＝ 14。" },
   { id: "e-n2", stage: "elementary", topic: "number", difficulty: "challenge", prompt: "一盒彩色筆有 12 枝，買 7 盒後送給同學 18 枝，還剩下幾枝？", options: ["54 枝", "60 枝", "66 枝", "84 枝"], answer: 2, explanation: "先求彩色筆總數：12 × 7 ＝ 84 枝；再扣掉送出的 18 枝：84 − 18 ＝ 66 枝。" },
   { id: "e-f1", stage: "elementary", topic: "fraction", difficulty: "basic", prompt: "計算：3/4 − 1/8 ＝？", options: ["1/2", "5/8", "2/3", "7/8"], answer: 1, explanation: "先通分成相同分母：3/4 ＝ 6/8。再相減：6/8 − 1/8 ＝ 5/8。" },
@@ -288,6 +288,10 @@ function getCurrentUnits() {
   })));
 }
 
+function usesLessonIds(stage, grade) {
+  return stage === "senior" || stage === "junior" || (stage === "elementary" && grade >= 1 && grade <= 6);
+}
+
 function getAvailableQuestions() {
   const difficulty = document.getElementById("difficulty").value;
   const selectedUnits = getCurrentUnits().filter((unit) => selectedTopics.has(unit.id));
@@ -296,7 +300,7 @@ function getAvailableQuestions() {
     if (question.stage !== currentStage || question.grade !== Number(gradeSelect.value)) return false;
     if (currentStage === "senior") {
       if (!question.courses.includes(courseSelect.value) || !question.lessonIds.some((id) => selectedUnits.some((unit) => unit.id === id))) return false;
-    } else if (question.grade === 7 || question.grade === 8 || question.grade === 9
+    } else if (usesLessonIds(question.stage, question.grade)
       ? !question.lessonIds?.some((id) => selectedUnits.some((unit) => unit.id === id))
       : !selectedBankTopics.has(question.topic)) return false;
     if (difficulty === "basic" && question.difficulty !== "basic") return false;
@@ -329,12 +333,14 @@ function renderTopics() {
     const selectedCount = lessonIds.filter((id) => selectedTopics.has(id)).length;
     const allSelected = selectedCount === lessonIds.length;
     const bankTopics = new Set(item.lessons.map((itemLesson) => itemLesson.bankTopic).filter(Boolean));
-    const chapterQuestionCount = questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && (currentStage === "senior" ? question.lessonIds?.some((id) => lessonIds.includes(id)) && question.courses.includes(courseSelect.value) : gradeSelect.value === "7" || gradeSelect.value === "8" || gradeSelect.value === "9" ? question.lessonIds?.some((id) => lessonIds.includes(id)) : bankTopics.has(question.topic))).length;
+    const grade = Number(gradeSelect.value);
+    const lessonMapped = usesLessonIds(currentStage, grade);
+    const chapterQuestionCount = questionBank.filter((question) => question.stage === currentStage && question.grade === grade && (currentStage === "senior" ? question.lessonIds?.some((id) => lessonIds.includes(id)) && question.courses.includes(courseSelect.value) : lessonMapped ? question.lessonIds?.some((id) => lessonIds.includes(id)) : bankTopics.has(question.topic))).length;
     const lessonMarkup = item.lessons.map((itemLesson) => {
       const count = currentStage === "senior"
-        ? questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && question.lessonIds?.includes(itemLesson.id) && question.courses.includes(courseSelect.value)).length
-        : gradeSelect.value === "7" || gradeSelect.value === "8" || gradeSelect.value === "9" ? questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && question.lessonIds?.includes(itemLesson.id)).length
-          : itemLesson.bankTopic ? questionBank.filter((question) => question.stage === currentStage && question.grade === Number(gradeSelect.value) && question.topic === itemLesson.bankTopic).length : 0;
+        ? questionBank.filter((question) => question.stage === currentStage && question.grade === grade && question.lessonIds?.includes(itemLesson.id) && question.courses.includes(courseSelect.value)).length
+        : lessonMapped ? questionBank.filter((question) => question.stage === currentStage && question.grade === grade && question.lessonIds?.includes(itemLesson.id)).length
+          : itemLesson.bankTopic ? questionBank.filter((question) => question.stage === currentStage && question.grade === grade && question.topic === itemLesson.bankTopic).length : 0;
       const selected = selectedTopics.has(itemLesson.id);
       return `<button type="button" class="lesson-option${selected ? " selected" : ""}" data-topic="${itemLesson.id}" aria-pressed="${selected}">
         <span class="topic-checkbox">${selected ? "✓" : ""}</span><span class="lesson-title">${itemLesson.title}</span>
