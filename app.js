@@ -123,7 +123,7 @@ const curriculum = {
 };
 
 // 題庫同時收錄原創練習與公開歷屆題；每題可附來源、答案及逐步解說。
-const questionBank = [...(window.high1QuestionBank || []), ...(window.high1SecondSemesterQuestionBank || []), ...(window.junior7QuestionBank || []), ...(window.junior8QuestionBank || []), ...(window.junior9QuestionBank || []),
+const questionBank = [...(window.high1QuestionBank || []), ...(window.high1SecondSemesterQuestionBank || []), ...(window.high2QuestionBank || []), ...(window.high3QuestionBank || []), ...(window.junior7QuestionBank || []), ...(window.junior8QuestionBank || []), ...(window.junior9QuestionBank || []),
   { id: "e-n1", stage: "elementary", topic: "number", difficulty: "basic", prompt: "計算：48 ÷ 6 ＋ 3 × 2 ＝？", options: ["11", "14", "19", "22"], answer: 1, explanation: "先算乘除，再算加減。48 ÷ 6 ＝ 8，3 × 2 ＝ 6，所以 8 ＋ 6 ＝ 14。" },
   { id: "e-n2", stage: "elementary", topic: "number", difficulty: "challenge", prompt: "一盒彩色筆有 12 枝，買 7 盒後送給同學 18 枝，還剩下幾枝？", options: ["54 枝", "60 枝", "66 枝", "84 枝"], answer: 2, explanation: "先求彩色筆總數：12 × 7 ＝ 84 枝；再扣掉送出的 18 枝：84 − 18 ＝ 66 枝。" },
   { id: "e-f1", stage: "elementary", topic: "fraction", difficulty: "basic", prompt: "計算：3/4 − 1/8 ＝？", options: ["1/2", "5/8", "2/3", "7/8"], answer: 1, explanation: "先通分成相同分母：3/4 ＝ 6/8。再相減：6/8 − 1/8 ＝ 5/8。" },
