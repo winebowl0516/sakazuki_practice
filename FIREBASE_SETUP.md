@@ -1,15 +1,18 @@
 # Firebase 登入與雲端保存
 
-## 已建立的 Firebase 專案
+## Firebase 專案
 
-- Firebase 專案 ID：`xinyu-math-practice`
-- 專案顯示名稱：`XinYu Math Practice`
-- Web app：`XinYu Math Practice Web`
-- Google 登入：已啟用；支援信箱使用目前 Google 帳號
+- 目前網站使用的 Firebase 專案 ID：`sakazuki-practice`
+- 專案顯示名稱：`sakazuki-practice`
+- Web app：`sakazuki-practice Web`
+- Google 登入：已啟用；支援信箱使用 Firebase 帳號信箱
 - Cloud Firestore：Standard 版，資料位置 `asia-east1`（台灣）
 - 計費方案：Spark 免費方案；未啟用 Analytics、Gemini 或排程備份
+- 舊專案 `xinyu-math-practice` 保留，原有登入帳號與 Firestore 資料尚未遷移
 
 Firebase Web app 設定已填入 [`firebase-config.js`](firebase-config.js)。Web 設定中的 API key 是 Firebase 用來識別專案的瀏覽器設定值；資料存取安全性由 Firestore 規則控管，不要把服務帳戶私密金鑰放進網站。
+
+新專案已註冊網站 Web app，並啟用 Google 登入及發布 [`firestore.rules`](firestore.rules)。切換 Project ID 後，舊專案中的帳號與收藏、練習紀錄不會自動出現在新專案；舊專案仍保留，供日後匯出或遷移。
 
 ## 資料安全規則
 
@@ -25,7 +28,7 @@ Firebase Web app 設定已填入 [`firebase-config.js`](firebase-config.js)。We
 Firebase Authentication 已授權以下網域：
 
 - `localhost`：本機開發
-- `xinyu-math-practice.firebaseapp.com`、`xinyu-math-practice.web.app`：Firebase 預設網域
+- `sakazuki-practice.firebaseapp.com`、`sakazuki-practice.web.app`：Firebase 預設網域
 - `winebowl0516.github.io`：GitHub Pages 正式網站（2026-11-15 加入）
 
 若更換正式網站網域，請到 Firebase Console 的 **Authentication → Settings → Authorized domains** 加入新的主機名稱。請使用本機靜態伺服器或正式網站網址開啟 `index.html`；直接以 `file://` 開啟時，瀏覽器會限制 Firebase 所需的 ES modules 與 Google OAuth。
