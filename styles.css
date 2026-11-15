@@ -207,6 +207,7 @@ h1, h2, p { margin-top: 0; }
 .question-meta { display: flex; align-items: center; gap: 8px; color: #9aa2a6; font-size: 10px; }
 .question-origin { margin: 16px 0 -14px; color: #87928e; font-size: 10px; line-height: 1.6; }
 .question-origin a { color: #607b68; text-decoration: underline; text-underline-offset: 2px; }
+.question-bank-number { margin: 16px 0 -16px; color: #87928e; font-size: 9px; line-height: 1.5; overflow-wrap: anywhere; }
 .question-number { display: grid; place-items: center; width: 27px; height: 27px; border-radius: 8px; color: #45677c; background: #edf3f3; font-size: 11px; font-weight: 700; }
 .question-type { padding: 4px 7px; color: #8a9a6b; background: #f2f5e9; border-radius: 5px; font-size: 9px; }
 .question-score { margin-left: auto; }

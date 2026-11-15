@@ -196,6 +196,18 @@ const questionBank = [...(window.elementary1QuestionBank || []), ...(window.elem
   { id: "b-percent1", stage: "senior", topic: "statistics", difficulty: "basic", prompt: "某校有 250 位學生，其中 30% 參加數學社，參加者有幾人？", options: ["50 人", "65 人", "75 人", "80 人"], answer: 2, explanation: "250×30%＝250×0.3＝75 人。" },
 ];
 
+const questionNumberById = window.questionNumberById || {};
+const assignedQuestionNumbers = new Set();
+const questionNumberPattern = /^Math_(Elementary_Grade[1-6]|JuniorHigh_Grade[7-9]|SeniorHigh_Grade(?:10|11|12)_Math(?:A|B|AB))_Unit\d{2}_Question\d{3}$/;
+questionBank.forEach((question) => {
+  const questionNumber = questionNumberById[question.id];
+  if (!questionNumber) throw new Error(`題目缺少全域編號：${question.id}`);
+  if (!questionNumberPattern.test(questionNumber)) throw new Error(`題目編號格式錯誤：${questionNumber}`);
+  if (assignedQuestionNumbers.has(questionNumber)) throw new Error(`題目編號重複：${questionNumber}`);
+  assignedQuestionNumbers.add(questionNumber);
+  question.questionNumber = questionNumber;
+});
+
 const questionGrades = {
   "e1-n1": 1, "e1-g1": 1, "e2-n1": 2, "e2-m1": 2, "e3-n1": 3, "e3-f1": 3,
   "e-n1": 4, "e-n2": 4, "e-m1": 4, "e-m2": 4, "e-g1": 4, "e-f1": 5, "e-f2": 5, "e-g2": 5, "e6-r1": 6, "e6-r2": 6,
@@ -652,6 +664,7 @@ function renderQuestion() {
   card.innerHTML = `
     <div class="question-meta"><span class="question-number">${String(currentQuestion + 1).padStart(2, "0")}</span><span>第 ${currentQuestion + 1} 題</span><span class="question-type">單選題</span><span class="question-score">平均配分</span></div>
     ${questionOrigin}
+    <p class="question-bank-number">題庫編號：${escapeHtml(question.questionNumber)}</p>
     <p class="question-prompt">${question.prompt}</p>
     <div class="option-mode-row"><span class="option-mode-label">選項工具</span><button type="button" class="option-mode-button${optionMarkingMode ? " active" : ""}" id="toggle-option-mode" aria-pressed="${optionMarkingMode}">${optionMarkingMode ? "切回作答" : "劃掉選項"}</button><span class="option-mode-hint">${optionMarkingMode ? "點選選項可劃掉或恢復" : "作答模式：選擇你的答案"}</span></div>
     <div class="options-list" role="radiogroup" aria-label="選擇答案">${question.options.map((option, index) => {const eliminated=markedOptions.has(index);return `<button type="button" class="answer-option${selected === index ? " selected" : ""}${eliminated ? " eliminated" : ""}" role="radio" aria-checked="${selected === index}" aria-label="${letters[index]}：${option}${eliminated ? "，已劃掉" : ""}" data-option="${index}"><span class="option-letter">${letters[index]}</span><span class="option-text">${option}</span></button>`}).join("")}</div>
